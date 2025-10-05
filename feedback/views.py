@@ -88,8 +88,8 @@ class SubmitFeedbackView(APIView):
         return Response({'message': 'Feedback submitted successfully'})
 
 class CheckTokenView(APIView):
-    def get(self, request):
-        token = request.query_params.get('token')
+    def post(self, request):
+        token = request.data.get('token')
         if not token:
             return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
 
