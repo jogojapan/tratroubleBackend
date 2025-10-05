@@ -50,7 +50,7 @@ class VerifyEmailView(APIView):
             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
         if ev.verified:
-            return Response({'message': 'Email already verified'})
+            return Response({'error': 'Email already verified'}, status=status.HTTP_409_CONFLICT)
 
         if not ev.is_recent():
             return Response({'error': 'Verification token expired'}, status=status.HTTP_400_BAD_REQUEST)
