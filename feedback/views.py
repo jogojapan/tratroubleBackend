@@ -86,3 +86,19 @@ class SubmitFeedbackView(APIView):
             geo_location=geo_location
         )
         return Response({'message': 'Feedback submitted successfully'})
+
+class CheckTokenView(APIView):
+    def get(self, request):
+        token = request.query_params.get('token')
+        if not token:
+            return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            ev = EmailVerification.objects.get(token=token)
+        except EmailVerification.DoesNotExist:
+            return Response({'error': 'Unknown token'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not ev.verified:
+            return Response({'error': 'Email not verified for this token'}, status=status.HTTP_403_FORBIDDEN)
+
+        return Response({'message': 'ok'}, status=status.HTTP_200_OK)
