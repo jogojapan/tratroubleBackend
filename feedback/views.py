@@ -47,13 +47,13 @@ class VerifyEmailView(APIView):
         try:
             ev = EmailVerification.objects.get(token=token)
         except EmailVerification.DoesNotExist:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid token'}, status=status.HTTP_404_NOT_FOUND)
 
         if ev.verified:
             return Response({'error': 'Email already verified'}, status=status.HTTP_409_CONFLICT)
 
         if not ev.is_recent():
-            return Response({'error': 'Verification token expired'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Verification token expired'}, status=status.HTTP_410_GONE)
 
         ev.verified = True
         ev.save()
@@ -69,7 +69,16 @@ class SubmitFeedbackView(APIView):
         
         if not all([token, line, destination, geo_location]):
             return Response({'error': 'All fields are required'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+        # Check if token is registered and verified
+        try:
+            ev = EmailVerification.objects.get(token=token)
+        except EmailVerification.DoesNotExist:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not ev.verified:
+            return Response({'error': 'Email not verified for this token'}, status=status.HTTP_403_FORBIDDEN)
+
         feedback = Feedback.objects.create(
             token=token,
             line=line,
