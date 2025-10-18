@@ -65,7 +65,7 @@ class SubmitEmailView(APIView):
         return Response({'message': 'Verification email sent'})
 
 class VerifyEmailView(APIView):
-    def get(self, request):
+    def post(self, request):
         token = request.query_params.get('token')
         if not token:
             return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
