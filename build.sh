@@ -12,4 +12,4 @@ docker build \
   -t tratrouble-backend:$GIT_VERSION \
   .
 
-echo "Image built successfully: my-django-app:$GIT_VERSION"
+echo "Image built successfully: tratrouble-backend:$GIT_VERSION"
