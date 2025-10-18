@@ -51,7 +51,7 @@ class SubmitEmailView(APIView):
             defaults={'token': token, 'created_at': timezone.now(), 'verified': False}
         )
 
-        if platform in ['android','ios']:
+        if platform in ['mobile', 'android', 'ios']:
             verification_link = f"{EMAIL_VERIFICATION_APP_NAME}://verify?token={token}"
         else:
             verification_link = f"https://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
