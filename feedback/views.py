@@ -57,7 +57,7 @@ class SubmitEmailView(APIView):
             verification_link = f"https://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
         send_mail(
             'Verify your email',
-            f'Click the link to verify your email: {verification_link}',
+            f'Click the link to verify your email: <a href="{verification_link}">{verification_link}</a>',
             settings.DEFAULT_FROM_EMAIL,
             [email],
             fail_silently=False,
