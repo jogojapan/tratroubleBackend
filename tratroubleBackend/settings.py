@@ -19,13 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%zzj%iu8eeh%wm^k-p6o*@@hoz*u4q*gjxi9b8!eah5f4pb$*q'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+# Import server configuration
+from .server_config import ALLOWED_HOSTS, DEBUG, SECRET_KEY, CORS_ALLOWED_ORIGINS
 
 
 # Application definition
@@ -40,12 +35,14 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
+    'corsheaders',
     'rest_framework',
     'feedback',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -129,3 +126,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 from .email_credentials import *
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# CORS configuration
+CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS

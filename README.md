@@ -178,6 +178,15 @@ podman-compose up -d
 
 All configuration can be provided via environment variables with the `TRATROUBLE_` prefix:
 
+### Server Configuration
+
+- `TRATROUBLE_ALLOWED_HOSTS` - Comma-separated list of allowed hosts (default: `localhost,127.0.0.1`)
+- `TRATROUBLE_DEBUG` - Enable debug mode (default: `True`)
+- `TRATROUBLE_SECRET_KEY` - Django secret key for production (default: insecure development key)
+- `TRATROUBLE_CORS_ALLOWED_ORIGINS` - Comma-separated list of CORS allowed origins (default: `http://localhost:3000,http://localhost:8000`)
+
+### Email Configuration
+
 - `TRATROUBLE_EMAIL_HOST` - SMTP server hostname
 - `TRATROUBLE_EMAIL_PORT` - SMTP server port (default: 587)
 - `TRATROUBLE_EMAIL_HOST_USER` - SMTP username
@@ -186,6 +195,23 @@ All configuration can be provided via environment variables with the `TRATROUBLE
 - `TRATROUBLE_DEFAULT_FROM_EMAIL` - From email address for sending emails
 - `TRATROUBLE_EMAIL_VERIFICATION_DOMAIN` - Domain for web verification links
 - `TRATROUBLE_EMAIL_VERIFICATION_APP_NAME` - App scheme for mobile verification links
+
+### Example Configuration
+
+For local development:
+```bash
+export TRATROUBLE_ALLOWED_HOSTS=localhost,127.0.0.1
+export TRATROUBLE_DEBUG=True
+export TRATROUBLE_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+```
+
+For production:
+```bash
+export TRATROUBLE_ALLOWED_HOSTS=api.example.com,example.com
+export TRATROUBLE_DEBUG=False
+export TRATROUBLE_SECRET_KEY=your-secure-secret-key-here
+export TRATROUBLE_CORS_ALLOWED_ORIGINS=https://app.example.com,https://example.com
+```
 
 ## Database
 
@@ -212,6 +238,7 @@ tratroubleBackend/
 ├── tratroubleBackend/        # Project settings
 │   ├── settings.py          # Django settings
 │   ├── urls.py              # Main URL routing
+│   ├── server_config.py     # Server configuration (domain, debug, CORS)
 │   ├── email_config.py      # Email configuration
 │   └── email_credentials.py # SMTP credentials
 ├── manage.py                # Django management script
