@@ -72,11 +72,47 @@ The API will be available at `http://localhost:8000/api/`
 
 ## Docker Deployment
 
-### Building the Docker Image
 
+### Build Script Usage
+
+The most convenient way of building a docker image and having the git commit id included as a version string is to use the build script we provide:
+
+This script builds the `tratrouble-backend` Docker image with a tag based on the current Git commit hash. It supports optional tagging with a namespace and the `:latest` tag.
+
+#### Options
+
+- `--namespace <name>`  
+  Sets the Docker namespace (e.g., `jogojapan`).  
+  Default: none (builds as `tratrouble-backend:<tag>`)
+
+- `--latest`  
+  Also builds and tags the image as `:latest`.
+
+#### Examples
+
+Build with Git commit tag only:
 ```bash
-docker build -t tratrouble-backend:latest .
+./build.sh
+# Result: tratrouble-backend:3cee798
 ```
+
+Build with namespace:
+```bash
+./build.sh --namespace myspace
+# Result: myspace/tratrouble-backend:3cee798
+```
+
+Build with namespace and latest tag:
+```bash
+./build.sh --namespace myspace --latest
+# Results:
+# - myspace/tratrouble-backend:3cee798
+# - myspace/tratrouble-backend:latest
+```
+
+> ✅ The script automatically uses the short Git commit hash (e.g., `3cee798`) as the version tag. Ensure you're in a Git repository when running the script. [^1]
+
+[^1]: [Docker Build](https://docs.docker.com/reference/cli/docker/buildx/build/) (100%)
 
 ### Running with Docker
 
