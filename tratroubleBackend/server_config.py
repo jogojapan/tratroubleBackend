@@ -12,3 +12,10 @@ SECRET_KEY = os.getenv('TRATROUBLE_SECRET_KEY', 'django-insecure-%zzj%iu8eeh%wm^
 
 # CORS allowed origins (for frontend requests)
 CORS_ALLOWED_ORIGINS = os.getenv('TRATROUBLE_CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8000').split(',')
+
+# Trust X-Forwarded-Proto header from reverse proxy
+# This is needed when running behind a reverse proxy that handles HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Allow X-Forwarded-For header for client IP detection
+USE_X_FORWARDED_HOST = True
