@@ -32,12 +32,14 @@ class IsValidTokenPermission(BasePermission):
 
 # Import email verification domain
 from tratroubleBackend.email_config import EMAIL_VERIFICATION_DOMAIN
+from tratroubleBackend.email_config import EMAIL_VERIFICATION_APP_NAME
 
 class SubmitEmailView(APIView):
     def post(self, request):
         email = request.data.get('email')
         if not email:
             return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+        platform = request.data.get('platform') or 'web'
 
         # Generate token using HMAC with secret key
         secret_key = settings.SECRET_KEY.encode('utf-8')
@@ -49,7 +51,10 @@ class SubmitEmailView(APIView):
             defaults={'token': token, 'created_at': timezone.now(), 'verified': False}
         )
 
-        verification_link = f"http://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
+        if platform in ['android','ios']:
+            verification_link = f"{EMAIL_VERIFICATION_APP_NAME}://verify?token={token}"
+        else:
+            verification_link = f"https://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
         send_mail(
             'Verify your email',
             f'Click the link to verify your email: {verification_link}',
