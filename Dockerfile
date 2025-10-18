@@ -25,11 +25,19 @@ COPY . /code/
 ARG GIT_COMMIT=unknown
 ENV GIT_COMMIT=$GIT_COMMIT
 
-# Create necessary directories and set permissions
+# Create necessary directories with proper ownership and permissions
 RUN mkdir -p /code/logs /code/data && \
-    chmod 777 /code && \
-    chmod 777 /code/logs && \
-    chmod 777 /code/data
+    chown -R 1000:100 /code && \
+    chmod 755 /code && \
+    chmod 755 /code/logs && \
+    chmod 755 /code/data
+
+# Create a non-root user to run the application
+RUN useradd -m -u 1000 -g 100 appuser && \
+    chown -R appuser:appuser /code
+
+# Switch to non-root user
+USER appuser
 
 # Expose port
 EXPOSE 8000
