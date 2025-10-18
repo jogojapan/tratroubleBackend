@@ -25,8 +25,13 @@ COPY . /code/
 ARG GIT_COMMIT=unknown
 ENV GIT_COMMIT=$GIT_COMMIT
 
+# Create necessary directories and set permissions
+RUN mkdir -p /code/logs && \
+    chmod 755 /code && \
+    chmod 755 /code/logs
+
 # Expose port
 EXPOSE 8000
 
-# Run the Django development server (or use Gunicorn in production)
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "tratroubleBackend.wsgi:application"]
+# Run migrations and start the application
+CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --access-logfile - --error-logfile - tratroubleBackend.wsgi:application"]
