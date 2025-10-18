@@ -26,9 +26,10 @@ ARG GIT_COMMIT=unknown
 ENV GIT_COMMIT=$GIT_COMMIT
 
 # Create necessary directories and set permissions
-RUN mkdir -p /code/logs && \
-    chmod 755 /code && \
-    chmod 755 /code/logs
+RUN mkdir -p /code/logs /code/data && \
+    chmod 777 /code && \
+    chmod 777 /code/logs && \
+    chmod 777 /code/data
 
 # Expose port
 EXPOSE 8000

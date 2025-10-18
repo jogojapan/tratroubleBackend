@@ -20,9 +20,8 @@ services:
       - TRATROUBLE_EMAIL_VERIFICATION_DOMAIN=${TRATROUBLE_EMAIL_VERIFICATION_DOMAIN}
       - TRATROUBLE_EMAIL_VERIFICATION_APP_NAME=${TRATROUBLE_EMAIL_VERIFICATION_APP_NAME}
     volumes:
-      - ./db:/code/db
+      - ./data:/code/data
       - ./logs:/code/logs
     command: >
-      sh -c "mkdir -p /code/db &&
-             python manage.py migrate &&
+      sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
