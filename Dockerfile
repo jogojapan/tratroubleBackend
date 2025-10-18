@@ -33,8 +33,9 @@ RUN mkdir -p /code/logs /code/data && \
     chmod 755 /code/data
 
 # Create a non-root user to run the application
-RUN useradd -m -u 1000 -g 100 appuser && \
-    chown -R appuser:appuser /code
+RUN groupadd -g 100 appgroup && \
+    useradd -m -u 1000 -g 100 appuser && \
+    chown -R 1000:100 /code
 
 # Switch to non-root user
 USER appuser

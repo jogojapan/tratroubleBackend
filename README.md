@@ -174,6 +174,77 @@ Or with Podman Compose:
 podman-compose up -d
 ```
 
+## Container User and Permissions
+
+The Tratrouble backend container runs as a non-root user for security:
+
+- **User ID (UID)**: 1000
+- **Group ID (GID)**: 100
+
+### Volume Permissions
+
+When mapping volumes for the database and logs, ensure the host directories have the correct permissions so the container user can read and write to them.
+
+#### Option 1: Create directories with correct ownership (Recommended)
+
+```bash
+# Create the directories
+mkdir -p ./data ./logs
+
+# Set ownership to UID 1000 and GID 100
+chown 1000:100 ./data ./logs
+
+# Set permissions (755 allows owner to read/write/execute)
+chmod 755 ./data ./logs
+```
+
+#### Option 2: Use Docker volume driver
+
+Instead of bind mounts, use Docker named volumes which handle permissions automatically:
+
+```yaml
+volumes:
+  data:
+  logs:
+
+services:
+  web:
+    volumes:
+      - data:/code/data
+      - logs:/code/logs
+```
+
+#### Option 3: Run with user mapping (Podman)
+
+If using Podman, you can map the container user to your host user:
+
+```bash
+podman run --userns=keep-id \
+  -v ./data:/code/data \
+  -v ./logs:/code/logs \
+  tratrouble-backend:latest
+```
+
+### Troubleshooting Permission Issues
+
+If you encounter "Permission denied" errors:
+
+1. Check the ownership of your mounted directories:
+   ```bash
+   ls -ld ./data ./logs
+   ```
+
+2. Verify the permissions:
+   ```bash
+   ls -la ./data ./logs
+   ```
+
+3. Fix permissions if needed:
+   ```bash
+   chown 1000:100 ./data ./logs
+   chmod 755 ./data ./logs
+   ```
+
 ## Environment Variables
 
 All configuration can be provided via environment variables with the `TRATROUBLE_` prefix:
