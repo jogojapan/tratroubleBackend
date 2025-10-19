@@ -1,3 +1,4 @@
+from datetime import timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +11,7 @@ from .models import Feedback, EmailVerification
 from django.utils import timezone
 import hashlib
 import hmac
+import secrets
 
 
 class IsValidTokenPermission(BasePermission):
@@ -34,21 +36,49 @@ class IsValidTokenPermission(BasePermission):
 from tratroubleBackend.email_config import EMAIL_VERIFICATION_DOMAIN
 from tratroubleBackend.email_config import EMAIL_VERIFICATION_APP_NAME
 
+class DeviceIdentifier:
+    def get_device_id(self, request):
+        """Extract device identifier from request"""
+        # Try to get device ID from custom header (mobile apps)
+        device_id = request.META.get('HTTP_X_DEVICE_ID')
+
+        # Fallback to User-Agent fingerprinting for web
+        if not device_id:
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            accept_language = request.META.get('HTTP_ACCEPT_LANGUAGE', '')
+            # Create fingerprint from browser characteristics
+            fingerprint_data = f"{user_agent}|{accept_language}"
+            device_id = hashlib.sha256(fingerprint_data.encode()).hexdigest()[:32]
+
+        return device_id
+
 class SubmitEmailView(APIView):
+    TOKEN_EXPIRY_HOURS = 24
+
     def post(self, request):
         email = request.data.get('email')
         if not email:
             return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
         platform = request.data.get('platform') or 'web'
+        device_id = DeviceIdentifier().get_device_id(request)
+        token_data = f"{email}{device_id}{secrets.token_urlsafe(16)}{timezone.now().timestamp()}"
+        secret_key = settings.SECRET_KEY.encode('utf-8')
 
         # Generate token using HMAC with secret key
-        secret_key = settings.SECRET_KEY.encode('utf-8')
-        token = hmac.new(secret_key, email.encode('utf-8'), hashlib.sha256).hexdigest()
-
+        token = self._generate_hmac_token(email, device_id)
+        expires_at = timezone.now() + timedelta(hours=self.TOKEN_EXPIRY_HOURS)
+        
         # Create or update EmailVerification record
         ev, created = EmailVerification.objects.update_or_create(
             email=email,
-            defaults={'token': token, 'created_at': timezone.now(), 'verified': False}
+            defaults={
+                'token': token,
+                'device_id': device_id,
+                'platform': platform,
+                'created_at': timezone.now(),
+                'expires_at': expires_at,
+                'verified': False
+            }
         )
 
         verification_link = f"https://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
@@ -61,11 +91,31 @@ class SubmitEmailView(APIView):
         )
         return Response({'message': 'Verification email sent'})
 
+    def _generate_hmac_token(self, email, device_id):
+        """Generate HMAC-signed token"""
+        # Include timestamp for uniqueness
+        timestamp = str(int(timezone.now().timestamp()))
+
+        # Create message to sign
+        message = f"{email}|{device_id}|{timestamp}|{secrets.token_urlsafe(8)}"
+
+        # Sign with Django's SECRET_KEY
+        secret_key = settings.SECRET_KEY.encode('utf-8')
+        signature = hmac.new(
+            secret_key,
+            message.encode('utf-8'),
+            hashlib.sha256
+        ).hexdigest()
+
+        return signature  # This will be the token
+
 class VerifyEmailView(APIView):
     def post(self, request):
         token = request.data.get('token')
         if not token:
             return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if len(token) != 64:
+            return Response({'error': 'Invalid token format'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             ev = EmailVerification.objects.get(token=token)
@@ -74,9 +124,17 @@ class VerifyEmailView(APIView):
 
         if ev.verified:
             return Response({'error': 'Email already verified'}, status=status.HTTP_409_CONFLICT)
-
-        if not ev.is_recent():
+        
+        if timezone.now() > ev.expires_at:
             return Response({'error': 'Verification token expired'}, status=status.HTTP_410_GONE)
+
+        # Device binding verification - critical security check
+        current_device_id = DeviceIdentifier().get_device_id(request)
+        if ev.device_id and ev.device_id != current_device_id:
+            return Response({
+                'error': 'Device mismatch', 
+                'message': 'Verification must be completed on the same device that requested it.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         ev.verified = True
         ev.save()
