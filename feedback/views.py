@@ -71,14 +71,12 @@ class SubmitEmailView(APIView):
         # Create or update EmailVerification record
         ev, created = EmailVerification.objects.create(
             email=email,
-            defaults={
-                'token': token,
-                'device_id': device_id,
-                'platform': platform,
-                'created_at': timezone.now(),
-                'expires_at': expires_at,
-                'verified': False
-            }
+            token=token,
+            device_id=device_id,
+            platform=platform,
+            created_at=timezone.now(),
+            expires_at=expires_at,
+            verified=False,
         )
 
         verification_link = f"https://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
