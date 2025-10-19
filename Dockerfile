@@ -44,4 +44,4 @@ USER appuser
 EXPOSE 8000
 
 # Run migrations and start the application
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --access-logfile - --error-logfile - tratroubleBackend.wsgi:application"]
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --access-logfile - --error-logfile - tratroubleBackend.wsgi:application"]

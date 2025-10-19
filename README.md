@@ -63,6 +63,12 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
+If you want deep links (e.g., for user account verification) to work, you need to follow the instructions on "Setting up deep links", see below in the "Docker Deployment" section. Once you have set up your `staticfiles/.well-known/assetlinks.json` you would then need to include this in the files served by Django:
+
+```bash
+python manage.py collectstatic --noinput
+```
+
 6. Start the development server:
 ```bash
 python manage.py runserver
@@ -72,6 +78,68 @@ The API will be available at `http://localhost:8000/api/`
 
 ## Docker Deployment
 
+### Setting Up Deep Links for Android
+
+To enable deep links in the Android app, you need to configure digital asset link verification on your backend.
+
+#### Prerequisites
+
+- Java Development Kit (JDK) installed on your machine
+- Your Android app's package name
+- Access to your backend server's `.well-known` directory
+
+#### Steps
+
+1. **Obtain your app's SHA256 certificate fingerprint**
+
+   Run the following command in your terminal (any directory):
+
+   ```bash
+   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+   ```
+
+   For release builds, use your release keystore instead of the debug keystore.
+
+   Copy the SHA256 fingerprint from the output.
+
+2. **Create the assetlinks.json file**
+
+   Create the directory structure at the project root (same directory where this README is located):
+
+   ```bash
+   mkdir -p staticfiles/.well-known/
+   ```
+
+   Create `staticfiles/.well-known/assetlinks.json` with the following content:
+
+   ```json
+   [
+     {
+       "relation": ["delegate_permission/common.handle_all_urls"],
+       "target": {
+         "namespace": "android_app",
+         "package_name": "your.package.name",
+         "sha256_cert_fingerprints": ["your_sha256_fingerprint"]
+       }
+     }
+   ]
+   ```
+
+   Replace `your.package.name` with your Android app's package name (something like `com.yourdomain.appname`) and `your_sha256_fingerprint` with the fingerprint obtained in step 1.
+
+3. **Build and deploy**
+
+   Build your Docker image as usual. The `assetlinks.json` file will be included in the container and served at `https://your-domain/.well-known/assetlinks.json`.
+
+4. **Verify**
+
+   After deployment, visit `https://your-domain/.well-known/assetlinks.json` in your browser to confirm the file is accessible.
+
+#### Notes
+
+- The `staticfiles` directory is in `.gitignore`, so each developer must create it locally.
+- For different Android app variants (debug/release), use the corresponding certificate fingerprint.
+- The digital asset link file must be accessible over HTTPS for Android 12 and higher.
 
 ### Build Script Usage
 
