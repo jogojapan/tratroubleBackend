@@ -164,13 +164,13 @@ class BadJsonView(APIView):
 
     def post(self, request):
         token = request.data.get('token')
-        json_str = request.data.get('json')
-        target = request.data.get('target')
+        json_str = request.data.get('data')
+        url = request.data.get('url')
 
-        if not all([token, json_str, target]):
+        if not all([token, json_str, url]):
             return Response({'error': 'All fields are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        print(f"Received bad-json request with token={token}, json={json_str}, target={target}")
+        print(f"Received bad-json request with token={token}, json={json_str}, target={url}")
         return Response({'message': 'Received bad-json request'})
 
 class CheckTokenView(APIView):
