@@ -51,8 +51,6 @@ class SubmitEmailView(APIView):
             defaults={'token': token, 'created_at': timezone.now(), 'verified': False}
         )
 
-        # Always use HTTPS links for email clients to recognize as clickable
-        # Mobile apps can be configured to intercept these URLs via deep linking
         verification_link = f"https://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
         send_mail(
             'Verify your email',
