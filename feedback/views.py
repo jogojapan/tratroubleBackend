@@ -51,13 +51,12 @@ class SubmitEmailView(APIView):
             defaults={'token': token, 'created_at': timezone.now(), 'verified': False}
         )
 
-        if platform in ['mobile', 'android', 'ios']:
-            verification_link = f"{EMAIL_VERIFICATION_APP_NAME}://verify?token={token}"
-        else:
-            verification_link = f"https://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
+        # Always use HTTPS links for email clients to recognize as clickable
+        # Mobile apps can be configured to intercept these URLs via deep linking
+        verification_link = f"https://{EMAIL_VERIFICATION_DOMAIN}/api/verify-email/?token={token}"
         send_mail(
             'Verify your email',
-            f'Click the link to verify your email: <a href="{verification_link}">{verification_link}</a>',
+            f'Click the link to verify your email: {verification_link}',
             settings.DEFAULT_FROM_EMAIL,
             [email],
             fail_silently=False,
