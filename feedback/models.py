@@ -14,11 +14,17 @@ class Feedback(models.Model):
 class EmailVerification(models.Model):
     email = models.EmailField(unique=True)
     token = models.CharField(max_length=64, unique=True)
+    device_id = models.CharField(max_length=100, blank=True)
+    platform = models.CharField(max_length=20, default='web')
     created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(default=timezone.now)
     verified = models.BooleanField(default=False)
 
-    def is_recent(self):
-        return timezone.now() - self.created_at <= timezone.timedelta(hours=1)
+    class Meta:
+        indexes = [
+            models.Index(fields=['token']),
+            models.Index(fields=['email']),
+        ]
 
     def __str__(self):
         return f"EmailVerification(email={self.email}, verified={self.verified})"
