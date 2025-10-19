@@ -12,7 +12,7 @@ class Feedback(models.Model):
         return f"Feedback {self.id} for line {self.line} to {self.destination}"
 
 class EmailVerification(models.Model):
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     token = models.CharField(max_length=64, unique=True)
     device_id = models.CharField(max_length=100, blank=True)
     platform = models.CharField(max_length=20, default='web')
@@ -24,7 +24,9 @@ class EmailVerification(models.Model):
         indexes = [
             models.Index(fields=['token']),
             models.Index(fields=['email']),
+            models.Index(fields=['email', 'verified']),
         ]
 
     def __str__(self):
-        return f"EmailVerification(email={self.email}, verified={self.verified})"
+        status = "verified" if self.verified else "pending"
+        return f"{self.email} ({self.platform}) - {status}"
