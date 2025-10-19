@@ -69,7 +69,7 @@ class SubmitEmailView(APIView):
         expires_at = timezone.now() + timedelta(hours=self.TOKEN_EXPIRY_HOURS)
         
         # Create or update EmailVerification record
-        ev, created = EmailVerification.objects.create(
+        ev = EmailVerification.objects.create(
             email=email,
             token=token,
             device_id=device_id,
