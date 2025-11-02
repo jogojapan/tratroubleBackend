@@ -17,8 +17,22 @@ paths:
       responses:
         '200':
           description: Feedback submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
         '400':
-          description: Invalid request
+          description: Bad Request - Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -67,3 +81,28 @@ components:
           description: Additional textual comments on the ride
       required:
         - movementId
+
+    SuccessResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Feedback submitted successfully
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Invalid request payload
+        details:
+          type: array
+          items:
+            type: string
+          description: Additional details about the error
