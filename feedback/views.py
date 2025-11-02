@@ -7,7 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.crypto import salted_hmac
-from .models import Feedback, EmailVerification
+from .models import Feedback, EmailVerification, RideFeedback
 from django.utils import timezone
 import hashlib
 import hmac
@@ -139,33 +139,39 @@ class VerifyEmailView(APIView):
 
         return Response({'message': 'Email verified successfully'})
 
-class SubmitFeedbackView(APIView):
+class RideFeedbackView(APIView):
     permission_classes = [IsValidTokenPermission]
 
     def post(self, request):
-        token = request.data.get('token')
-        line = request.data.get('line')
-        destination = request.data.get('destination')
-        geo_location = request.data.get('geo_location')
-        
-        if not all([token, line, destination, geo_location]):
-            return Response({'error': 'All fields are required'}, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
+        required_fields = ['movementId', 'token']
+        for field in required_fields:
+            if field not in data:
+                return Response({'error': f'{field} is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        feedback = Feedback.objects.create(
-            token=token,
-            line=line,
-            destination=destination,
-            geo_location=geo_location
+        ride_feedback = RideFeedback.objects.create(
+            movement_id=data.get('movementId'),
+            punctuality=data.get('punctuality'),
+            onboard_info_display=data.get('onboardInfoDisplay'),
+            onboard_announcements=data.get('onboardAnnouncements'),
+            capacity=data.get('capacity'),
+            driving_style=data.get('drivingStyle'),
+            cleanliness=data.get('cleanliness'),
+            temperature=data.get('temperature'),
+            passenger_behavior=data.get('passengerBehavior'),
+            additional_comments=data.get('additionalComments'),
+            token=data.get('token'),
         )
-        return Response({'message': 'Feedback submitted successfully'})
+
+        return Response({'message': 'Ride feedback submitted successfully'})
         
 class BadJsonView(APIView):
     permission_classes = [IsValidTokenPermission]
 
     def post(self, request):
         token = request.data.get('token')
-        json_str = request.data.get('data')
         url = request.data.get('url')
+        json_str = request.data.get('data')
 
         if not all([token, json_str, url]):
             return Response({'error': 'All fields are required'}, status=status.HTTP_400_BAD_REQUEST)

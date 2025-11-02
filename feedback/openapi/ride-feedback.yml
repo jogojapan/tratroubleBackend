@@ -8,6 +8,13 @@ paths:
   /feedback:
     post:
       summary: Submit ride feedback
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+          description: Valid authentication token
       requestBody:
         required: true
         content:
@@ -27,6 +34,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal Server Error
           content:
@@ -36,6 +49,14 @@ paths:
 
 components:
   schemas:
+    TokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Valid authentication token
+      required:
+        - token
     RideFeedbackRequest:
       type: object
       properties:
