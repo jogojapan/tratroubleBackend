@@ -1,0 +1,69 @@
+openapi: 3.0.3
+info:
+  title: Ride Feedback API
+  description: API for submitting ride feedback about bus or train rides.
+  version: 1.0.0
+
+paths:
+  /feedback:
+    post:
+      summary: Submit ride feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RideFeedbackRequest'
+      responses:
+        '200':
+          description: Feedback submitted successfully
+        '400':
+          description: Invalid request
+
+components:
+  schemas:
+    RideFeedbackRequest:
+      type: object
+      properties:
+        movementId:
+          type: string
+          description: Unique identifier of the movement (bus/train ride)
+        punctuality:
+          type: string
+          description: Feedback on punctuality
+          enum: [onTime, late1to2Min, lateMoreThan2Min, earlyDeparture1to2Min, earlyDepartureMoreThan2Min]
+        onboardInfoDisplay:
+          type: string
+          description: Feedback on onboard info display
+          enum: [displayFunctional, displayBroken, displayNonExisting]
+        onboardAnnouncements:
+          type: string
+          description: Feedback on onboard announcements
+          enum: [clearAnnouncements, unclearAnnouncements, noAnnouncements]
+        capacity:
+          type: string
+          description: Feedback on ride capacity
+          enum: [gotASeat, couldStandComfortably, overcrowded]
+        drivingStyle:
+          type: string
+          description: Feedback on driving style
+          enum: [safeDriving, roughDriving, soRoughSomebodyFell]
+        cleanliness:
+          type: array
+          description: Multi-choice feedback on cleanliness issues
+          items:
+            type: string
+            enum: [greasySurfaces, someGarbage, lotsOfGarbage, liquidDirtOrVomit, smelly, extremeSmell, noProblems]
+        temperature:
+          type: string
+          description: Feedback on temperature conditions
+          enum: [tooWarm, tooCold, temperatureOk]
+        passengerBehavior:
+          type: string
+          description: Feedback on passenger behavior
+          enum: [noProblems, aggressiveBehavior, drunkPerson]
+        additionalComments:
+          type: string
+          description: Additional textual comments on the ride
+      required:
+        - movementId
