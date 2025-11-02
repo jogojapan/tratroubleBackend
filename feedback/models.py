@@ -33,6 +33,9 @@ class EmailVerification(models.Model):
 
 class RideFeedback(models.Model):
     movement_id = models.CharField(max_length=100)
+    line_name = models.CharField(max_length=100)
+    direction = models.CharField(max_length=100)
+    feedback_timestamp = models.DateTimeField()
     punctuality = models.CharField(max_length=50, blank=True, null=True)
     onboard_info_display = models.CharField(max_length=50, blank=True, null=True)
     onboard_announcements = models.CharField(max_length=50, blank=True, null=True)

@@ -63,6 +63,16 @@ components:
         movementId:
           type: string
           description: Unique identifier of the movement (bus/train ride)
+        lineName:
+          type: string
+          description: Name of the line
+        direction:
+          type: string
+          description: Direction of the line
+        feedbackTimestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the feedback
         punctuality:
           type: string
           description: Feedback on punctuality
@@ -102,6 +112,9 @@ components:
           description: Additional textual comments on the ride
       required:
         - movementId
+        - lineName
+        - direction
+        - feedbackTimestamp
 
     SuccessResponse:
       type: object

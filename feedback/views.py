@@ -144,13 +144,16 @@ class RideFeedbackView(APIView):
 
     def post(self, request):
         data = request.data
-        required_fields = ['movementId', 'token']
+        required_fields = ['movementId', 'token', 'lineName', 'direction', 'feedbackTimestamp']
         for field in required_fields:
             if field not in data:
                 return Response({'error': f'{field} is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         ride_feedback = RideFeedback.objects.create(
             movement_id=data.get('movementId'),
+            line_name=data.get('lineName'),
+            direction=data.get('direction'),
+            feedback_timestamp=data.get('feedbackTimestamp'),
             punctuality=data.get('punctuality'),
             onboard_info_display=data.get('onboardInfoDisplay'),
             onboard_announcements=data.get('onboardAnnouncements'),
